@@ -1,0 +1,4 @@
+interface:
+  display_name: "ChatArchive WebBridge Bulk Export"
+  short_description: "Bulk export AI chat history with QA"
+  default_prompt: "Use $chatarchive-webbridge-bulk-export to export and QA my AI chatbot conversations with ChatArchive and Kimi WebBridge."
