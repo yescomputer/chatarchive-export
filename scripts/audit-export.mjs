@@ -1,18 +1,11 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { getKnownAuthorLabels, getPlatformNotes, loadPlatformRegistry } from "./platform-registry.mjs";
 
-const KNOWN_AUTHORS = new Set([
-  "You",
-  "User",
-  "Assistant",
-  "ChatGPT",
-  "Gemini",
-  "Claude",
-  "DeepSeek",
-  "Perplexity",
-  "Grok"
-]);
+const PLATFORM_REGISTRY = loadPlatformRegistry();
+const KNOWN_AUTHORS = new Set(getKnownAuthorLabels(PLATFORM_REGISTRY));
+const PLATFORM_NOTES = getPlatformNotes(PLATFORM_REGISTRY);
 
 function usage() {
   return `Usage:
@@ -247,7 +240,7 @@ function auditExport(root) {
     notes: [
       "results.jsonl is append-only and may contain historical failed attempts that later succeeded; final status should be read from per-conversation summary.json files and this report.",
       "Zero-message candidates are preserved because the platform UI/network exposed those URLs, but they should not be counted as message-bearing conversations.",
-      "Perplexity enumeration should use https://www.perplexity.ai/library for broad history coverage."
+      ...PLATFORM_NOTES
     ]
   };
 }

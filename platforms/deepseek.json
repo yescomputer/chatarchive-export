@@ -1,0 +1,12 @@
+{
+  "id": "deepseek",
+  "displayName": "DeepSeek",
+  "defaultEnabled": true,
+  "authorAliases": ["DeepSeek"],
+  "canonicalUrlPatterns": ["https://chat.deepseek.com/a/chat/s/<sessionId>"],
+  "startUrls": ["https://chat.deepseek.com/"],
+  "enumerationNotes": [],
+  "domNotes": [],
+  "troubleshooting": [],
+  "qaNotes": []
+}

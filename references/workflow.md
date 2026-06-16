@@ -22,50 +22,45 @@
 
 ## Export Patterns
 
-Use all six default platforms unless the user narrows scope:
+Use all `defaultEnabled` platform IDs from this skill's `platforms/*.json` registry unless the user narrows scope. Pass the comma-joined IDs to the external ChatArchive exporter:
 
 ```bash
-node scripts/bulk-export-webbridge.js --platform chatgpt,gemini,claude,deepseek,perplexity,grok --format md,json --output exports/bulk-$(date +%F) --resume --account-label edge-default
+node scripts/bulk-export-webbridge.js --platform <default-platform-ids> --format md,json --output exports/bulk-$(date +%F) --resume --account-label edge-default
 ```
 
 Use a dry run for a new browser/account state:
 
 ```bash
-node scripts/bulk-export-webbridge.js --platform chatgpt,gemini,claude,deepseek,perplexity,grok --format md,json --output exports/bulk-$(date +%F) --dry-run --limit 2 --account-label edge-default
+node scripts/bulk-export-webbridge.js --platform <platform-id>[,<platform-id>] --format md,json --output exports/bulk-$(date +%F) --dry-run --limit 2 --account-label edge-default
 ```
 
 Resume with the same output directory:
 
 ```bash
-node scripts/bulk-export-webbridge.js --platform perplexity --format md,json --output exports/bulk-YYYY-MM-DD --resume --account-label edge-default
+node scripts/bulk-export-webbridge.js --platform <platform-id> --format md,json --output exports/bulk-YYYY-MM-DD --resume --account-label edge-default
 ```
 
 For multi-account exports, keep account labels stable and explicit:
 
 ```bash
-node scripts/bulk-export-webbridge.js --platform chatgpt --format md,json --output exports/bulk-YYYY-MM-DD --resume --account-label work --account-id work-chatgpt-edge
+node scripts/bulk-export-webbridge.js --platform <platform-id> --format md,json --output exports/bulk-YYYY-MM-DD --resume --account-label work --account-id <stable-account-id>
 ```
 
 The exporter should create `accounts/<account-slug>/<platform>/<conversation-id>/`. Do not flatten account directories; they prevent collisions when the same platform is exported from multiple accounts.
 
 ## Platform Notes
 
-- ChatGPT canonical conversations use `https://chatgpt.com/c/<id>`.
-- Gemini canonical conversations use `https://gemini.google.com/app/<id>` or gem URLs exposed by the UI.
-- Claude canonical conversations use `https://claude.ai/chat/<id>`.
-- DeepSeek canonical conversations use `https://chat.deepseek.com/a/chat/s/<sessionId>`.
-- Perplexity must enumerate from `https://www.perplexity.ai/library`; the homepage/history view can expose only a small recent subset.
-- Grok canonical conversations can appear as `/chat/<id>` or `/c/<id>` after navigation. Keep the tab active during DOM extraction.
+Platform-specific URL patterns, start pages, DOM behavior, QA notes, and troubleshooting now live in [platforms](../platforms) and [references/platforms](platforms/README.md). Read the target platform note before a live export, especially for platforms with custom enumeration or active-tab behavior.
 
 ## QA Procedure
 
 1. Audit local files:
    ```bash
-   node /Users/boyaxie/.agents/skills/chatarchive-webbridge-bulk-export/scripts/audit-export.mjs exports/bulk-YYYY-MM-DD --write-report
+   node /Users/boyaxie/.agents/skills/chatarchive-export/scripts/audit-export.mjs exports/bulk-YYYY-MM-DD --write-report
    ```
 2. Compare sampled original webpages:
    ```bash
-   node /Users/boyaxie/.agents/skills/chatarchive-webbridge-bulk-export/scripts/webpage-sample-check.mjs exports/bulk-YYYY-MM-DD --limit 1
+   node /Users/boyaxie/.agents/skills/chatarchive-export/scripts/webpage-sample-check.mjs exports/bulk-YYYY-MM-DD --limit 1
    ```
 3. If the webpage sample passes, update or preserve `qa-report.json`.
 4. Report final counts from `summary.json` files and `qa-report.json`, not raw `results.jsonl`.
@@ -85,7 +80,6 @@ Do not assert model usage from weak page evidence. UI labels, feature flags, mod
 ## Troubleshooting
 
 - If WebBridge commands time out, retry with `--command-timeout-ms 120000` or higher and resume the same output directory.
-- If Perplexity exports too few items, verify the start page is `/library` and rerun Perplexity with `--resume`.
-- If Grok exports duplicate messages or strange roles, inspect DOM selectors for nested assistant/user containers and re-test with a representative Grok fixture before re-exporting.
+- For platform-specific enumeration or DOM issues, read the matching file in `references/platforms/` and the registry notes in `platforms/<platform-id>.json`.
 - If `results.jsonl` shows failures but every `summary.json` is exported, treat those failures as historical attempts.
 - If a platform is logged out, mark it as authentication required and skip; do not automate credential entry unless the user explicitly takes over login.

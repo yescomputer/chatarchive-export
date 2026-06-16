@@ -1,0 +1,12 @@
+{
+  "id": "gemini",
+  "displayName": "Gemini",
+  "defaultEnabled": true,
+  "authorAliases": ["Gemini"],
+  "canonicalUrlPatterns": ["https://gemini.google.com/app/<id>"],
+  "startUrls": ["https://gemini.google.com/app"],
+  "enumerationNotes": ["Gemini conversations normally use app URLs; some gem URLs may be exposed by the UI."],
+  "domNotes": [],
+  "troubleshooting": [],
+  "qaNotes": []
+}

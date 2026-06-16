@@ -1,0 +1,12 @@
+{
+  "id": "chatgpt",
+  "displayName": "ChatGPT",
+  "defaultEnabled": true,
+  "authorAliases": ["ChatGPT"],
+  "canonicalUrlPatterns": ["https://chatgpt.com/c/<id>"],
+  "startUrls": ["https://chatgpt.com/"],
+  "enumerationNotes": [],
+  "domNotes": [],
+  "troubleshooting": [],
+  "qaNotes": []
+}

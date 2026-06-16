@@ -1,0 +1,12 @@
+{
+  "id": "perplexity",
+  "displayName": "Perplexity",
+  "defaultEnabled": true,
+  "authorAliases": ["Perplexity"],
+  "canonicalUrlPatterns": ["https://www.perplexity.ai/search/<id>", "https://www.perplexity.ai/library/<id>"],
+  "startUrls": ["https://www.perplexity.ai/library"],
+  "enumerationNotes": ["Enumerate from https://www.perplexity.ai/library for broad history coverage; homepage and history views can expose only a small recent subset."],
+  "domNotes": [],
+  "troubleshooting": ["If exports are too few, verify the start page is /library and rerun Perplexity with --resume."],
+  "qaNotes": ["Perplexity enumeration should use https://www.perplexity.ai/library for broad history coverage."]
+}

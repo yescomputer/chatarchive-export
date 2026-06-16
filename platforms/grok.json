@@ -1,0 +1,12 @@
+{
+  "id": "grok",
+  "displayName": "Grok",
+  "defaultEnabled": true,
+  "authorAliases": ["Grok"],
+  "canonicalUrlPatterns": ["/chat/<id>", "/c/<id>"],
+  "startUrls": ["https://grok.com/"],
+  "enumerationNotes": [],
+  "domNotes": ["Canonical conversations can appear as /chat/<id> or /c/<id> after navigation.", "Keep the tab active during DOM extraction."],
+  "troubleshooting": ["If duplicate messages or strange roles appear, inspect DOM selectors for nested assistant/user containers and re-test with a representative Grok fixture before re-exporting."],
+  "qaNotes": []
+}

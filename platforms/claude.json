@@ -1,0 +1,12 @@
+{
+  "id": "claude",
+  "displayName": "Claude",
+  "defaultEnabled": true,
+  "authorAliases": ["Claude"],
+  "canonicalUrlPatterns": ["https://claude.ai/chat/<id>"],
+  "startUrls": ["https://claude.ai/chats"],
+  "enumerationNotes": [],
+  "domNotes": [],
+  "troubleshooting": [],
+  "qaNotes": []
+}

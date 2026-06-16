@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { getAvailablePlatformIds, loadPlatformRegistry } from "./platform-registry.mjs";
 
 const DEFAULT_WEBBRIDGE_URL = "http://127.0.0.1:10086";
 
 function usage() {
   return `Usage:
-  node webpage-sample-check.mjs <export-root> [--platform chatgpt,grok] [--limit N] [--webbridge-url URL] [--dry-run-plan]
+  node webpage-sample-check.mjs <export-root> [--platform <platform-id>[,<platform-id>]] [--limit N] [--webbridge-url URL] [--dry-run-plan]
 
 Samples exported conversations and checks first/last message snippets against the current original webpage text through Kimi WebBridge.
 `;
@@ -51,6 +52,19 @@ function parseArgs(argv) {
   }
 
   return options;
+}
+
+function validatePlatforms(options, registry) {
+  if (options.platforms.length === 0) {
+    return;
+  }
+
+  const availablePlatforms = getAvailablePlatformIds(registry);
+  const available = new Set(availablePlatforms);
+  const unknown = options.platforms.filter((platform) => !available.has(platform));
+  if (unknown.length > 0) {
+    throw new Error(`Unknown platform(s): ${unknown.join(", ")}. Available platforms: ${availablePlatforms.join(", ")}`);
+  }
 }
 
 function walk(dir, predicate = () => true, files = []) {
@@ -253,6 +267,9 @@ async function main() {
     process.exitCode = options.help ? 0 : 1;
     return;
   }
+
+  const registry = loadPlatformRegistry();
+  validatePlatforms(options, registry);
 
   const root = path.resolve(options.root);
   const samples = selectSamples(root, options);
