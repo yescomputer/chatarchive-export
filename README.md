@@ -1,205 +1,224 @@
- # ChatArchive WebBridge Bulk Export
+# ChatArchive WebBridge Bulk Export
 
- 一个用于批量导出并质检 ChatArchive 对话归档的 Cursor Agent Skill。它通过 Kimi WebBridge 使用用户已经登录的真实浏览器会话，按平台注册表选择导出目标，并生成 Markdown、JSON 与 QA 报告。
+[简体中文](README.zh-CN.md)
 
- ## 适用场景
+ChatArchive WebBridge Bulk Export is an Agent Skill for bulk exporting and QA-checking AI chatbot conversation archives from the ChatArchive project. It uses Kimi WebBridge, the user's already-logged-in browser sessions, and registered platform plugins to produce Markdown, JSON, and QA reports.
 
- - 批量导出多个 AI 聊天平台的历史对话。
- - 中断后基于同一输出目录恢复导出。
- - 对导出的 Markdown/JSON 文件做一致性检查。
- - 抽样打开原始网页，核对首尾消息片段是否与导出内容一致。
- - 按账号、平台、会话 ID 组织归档，避免多账号导出时文件冲突。
+## Use cases
 
- ## 项目结构
+- Bulk export conversation history from multiple AI chatbot platforms.
+- Resume interrupted exports using the same output directory.
+- Audit exported Markdown and JSON files for consistency.
+- Sample original webpages and compare the first and last message snippets against exported content.
+- Organize archives by account, platform, and conversation ID to avoid conflicts during multi-account exports.
 
- ```text
- .
- ├── SKILL.md                         # Skill 入口说明
- ├── agents/openai.yaml               # Skill 展示信息
- ├── platforms/*.json                 # 平台插件 metadata 与 QA notes
- ├── references/workflow.md           # 通用导出流程与排障说明
- ├── references/platforms/*.md        # 平台特定 URL、枚举、DOM 与排障说明
- └── scripts/
-     ├── platform-registry.mjs        # 平台注册表读取与校验工具
-     ├── audit-export.mjs             # 本地导出文件审计工具
-     └── webpage-sample-check.mjs     # 通过 Kimi WebBridge 抽样核对原网页
- ```
+## Agent compatibility
 
- ## 前置条件
+This repository is structured for Codex, Claude Code, Cursor, and other agent-capable coding environments.
 
- 1. 在 ChatArchive 仓库根目录运行导出命令，通常为：
+- `SKILL.md` is the primary Agent Skills entrypoint. Its frontmatter includes `name` and `description`, and the skill directory name is `chatarchive-export`.
+- `AGENTS.md` provides repository-level instructions for Codex, Cursor, and compatible agents that read agent guidance before working.
+- `agents/openai.yaml` keeps the OpenAI/Codex display metadata.
+- Reference material lives in `references/` so agents can load detailed workflow and platform notes only when needed.
 
-    ```bash
-    /Users/boyaxie/IdeaProjects/ChatArchive
-    ```
+Actual execution still depends on the host agent being able to read local files, run local commands, and access Kimi WebBridge in the user's environment.
 
- 2. 确认 ChatArchive 导出脚本存在：
+## Project layout
 
-    ```bash
-    test -f scripts/bulk-export-webbridge.js
-    ```
+```text
+.
+├── SKILL.md                         # Agent Skills entrypoint
+├── AGENTS.md                        # Repository-level agent instructions
+├── agents/openai.yaml               # OpenAI/Codex display metadata
+├── platforms/*.json                 # Platform plugin metadata and QA notes
+├── references/workflow.md           # General export workflow and troubleshooting
+├── references/platforms/*.md        # Platform-specific URLs, enumeration, DOM, and troubleshooting notes
+└── scripts/
+    ├── platform-registry.mjs        # Platform registry reader and validator
+    ├── audit-export.mjs             # Local export audit helper
+    └── webpage-sample-check.mjs     # Kimi WebBridge webpage sampling helper
+```
 
- 3. 确认 Kimi WebBridge 正在运行且浏览器扩展已连接：
+## Prerequisites
 
-    ```bash
-    ~/.kimi-webbridge/bin/kimi-webbridge status
-    ```
+1. Run export commands from the ChatArchive repository root, normally:
 
-    只有在 `running: true` 且 `extension_connected: true` 时才继续。
+   ```bash
+   /Users/boyaxie/IdeaProjects/ChatArchive
+   ```
 
- 4. 用户需要已在 WebBridge 控制的浏览器配置中登录目标平台。本项目不会导出 Cookie、绕过登录，也不会绕过 CAPTCHA 或其他登录保护。
+2. Confirm the ChatArchive export script exists:
 
- 5. 如果修改过 ChatArchive 代码，导出前建议运行：
+   ```bash
+   test -f scripts/bulk-export-webbridge.js
+   ```
 
-    ```bash
-    npm test
-    ```
+3. Confirm Kimi WebBridge is running and the browser extension is connected:
 
- ## 快速开始
+   ```bash
+   ~/.kimi-webbridge/bin/kimi-webbridge status
+   ```
 
- ### 全量导出
+   Continue only when `running: true` and `extension_connected: true`.
 
- 在 ChatArchive 仓库根目录执行：
+4. The user must already be logged in to target platforms in the browser profile controlled by WebBridge. This skill does not export cookies, bypass login, bypass CAPTCHA, or work around authentication controls.
 
- ```bash
- node scripts/bulk-export-webbridge.js \
-   --platform <default-platform-ids> \
-   --format md,json \
-   --output exports/bulk-$(date +%F) \
-   --resume \
-   --account-label edge-default
- ```
+5. If ChatArchive code was modified before an export, run:
 
-`<default-platform-ids>` 指本 skill 的 `platforms/*.json` 中 `defaultEnabled` 为 `true` 的平台 ID，使用逗号拼接后传给 ChatArchive 外部导出器。
+   ```bash
+   npm test
+   ```
 
- ### 新账号或浏览器状态不确定时先 dry run
+## Quick start
 
- ```bash
- node scripts/bulk-export-webbridge.js \
-   --platform <platform-id>[,<platform-id>] \
-   --format md,json \
-   --output exports/bulk-$(date +%F) \
-   --dry-run \
-   --limit 2 \
-   --account-label edge-default
- ```
+### Full export
 
- ### 恢复中断导出
+Run from the ChatArchive repository root:
 
- 使用同一个输出目录和账号标签继续运行，例如：
+```bash
+node scripts/bulk-export-webbridge.js \
+  --platform <default-platform-ids> \
+  --format md,json \
+  --output exports/bulk-$(date +%F) \
+  --resume \
+  --account-label edge-default
+```
 
- ```bash
- node scripts/bulk-export-webbridge.js \
-   --platform <platform-id> \
-   --format md,json \
-   --output exports/bulk-YYYY-MM-DD \
-   --resume \
-   --account-label edge-default
- ```
+`<default-platform-ids>` is the comma-separated list of platform IDs whose `platforms/*.json` files have `defaultEnabled` set to `true`.
 
- ### 多账号导出
+### Dry run for a new account or uncertain browser state
 
- 多账号场景建议显式指定稳定账号标签与账号 ID：
+```bash
+node scripts/bulk-export-webbridge.js \
+  --platform <platform-id>[,<platform-id>] \
+  --format md,json \
+  --output exports/bulk-$(date +%F) \
+  --dry-run \
+  --limit 2 \
+  --account-label edge-default
+```
 
- ```bash
- node scripts/bulk-export-webbridge.js \
-   --platform <platform-id> \
-   --format md,json \
-   --output exports/bulk-YYYY-MM-DD \
-   --resume \
-   --account-label work \
-   --account-id <stable-account-id>
- ```
+### Resume an interrupted export
 
- ## 输出结构
+Use the same output directory and account label:
 
- 导出结果默认按账号、平台、会话 ID 分层：
+```bash
+node scripts/bulk-export-webbridge.js \
+  --platform <platform-id> \
+  --format md,json \
+  --output exports/bulk-YYYY-MM-DD \
+  --resume \
+  --account-label edge-default
+```
 
- ```text
- exports/bulk-YYYY-MM-DD/
- ├── manifest.jsonl
- ├── results.jsonl
- ├── qa-report.json
- └── accounts/<account-slug>/<platform>/<conversation-id>/
-     ├── summary.json
-     ├── *.md
-     └── *.json
- ```
+### Multi-account exports
 
- 关键文件说明：
+For multi-account workflows, use stable account labels and account IDs:
 
- - `manifest.jsonl`：候选会话列表。
- - `results.jsonl`：追加式尝试日志，历史失败记录可能在后续恢复成功后仍保留。
- - `summary.json`：每个会话的最终状态，应优先用于统计最终导出结果。
- - `qa-report.json`：本地审计和网页抽样核对报告。
+```bash
+node scripts/bulk-export-webbridge.js \
+  --platform <platform-id> \
+  --format md,json \
+  --output exports/bulk-YYYY-MM-DD \
+  --resume \
+  --account-label work \
+  --account-id <stable-account-id>
+```
 
- 统计最终结果时，不要只看 `results.jsonl`。应以每个 `summary.json` 以及 `qa-report.json` 为准。
+## Output contract
 
- ## QA 工具
+Export output is organized by account, platform, and conversation ID:
 
- ### 审计本地导出文件
+```text
+exports/bulk-YYYY-MM-DD/
+├── manifest.jsonl
+├── results.jsonl
+├── qa-report.json
+└── accounts/<account-slug>/<platform>/<conversation-id>/
+    ├── summary.json
+    ├── *.md
+    └── *.json
+```
 
- ```bash
- node /Users/boyaxie/.agents/skills/chatarchive-export/scripts/audit-export.mjs \
-   exports/bulk-YYYY-MM-DD \
-   --write-report
- ```
+Important files:
 
- 该工具会检查：
+- `manifest.jsonl`: candidate conversation list.
+- `results.jsonl`: append-only attempt log. Historical failures can remain after later retries succeed.
+- `summary.json`: final per-conversation status. Prefer this file for final export statistics.
+- `qa-report.json`: local audit and webpage sampling report.
 
- - `summary.json`、Markdown、JSON 的消息数量是否一致。
- - 是否缺失 Markdown 或 JSON payload 文件。
- - 是否仍存在未经确认的 `model` / `models` 断言字段。
- - 各平台导出数量、message-bearing 会话数量与零消息候选数量。
+Do not derive final success counts from `results.jsonl` alone. Use each `summary.json` and, when present, `qa-report.json`.
 
- ### 抽样核对原始网页
+## QA helpers
 
- ```bash
- node /Users/boyaxie/.agents/skills/chatarchive-export/scripts/webpage-sample-check.mjs \
-   exports/bulk-YYYY-MM-DD \
-   --limit 1
- ```
+### Audit local export files
 
- 该工具会通过 Kimi WebBridge 打开导出会话的原网页，并检查首条和末条消息片段是否能在页面正文中找到。工具会自行关闭它创建的 WebBridge session。
+```bash
+node /Users/boyaxie/.agents/skills/chatarchive-export/scripts/audit-export.mjs \
+  exports/bulk-YYYY-MM-DD \
+  --write-report
+```
 
- 如果只想查看抽样计划而不访问网页：
+The audit checks:
 
- ```bash
- node /Users/boyaxie/.agents/skills/chatarchive-export/scripts/webpage-sample-check.mjs \
-   exports/bulk-YYYY-MM-DD \
-   --limit 1 \
-   --dry-run-plan
- ```
+- Whether `summary.json`, Markdown, and JSON message counts agree.
+- Whether Markdown or JSON payload files are missing.
+- Whether unconfirmed `model` or `models` assertion fields are still present.
+- Per-platform export counts, message-bearing conversation counts, and zero-message candidate counts.
 
- ## 平台插件与注意事项
+### Sample original webpages
 
- 平台相关知识已经拆分到两个层次：
+```bash
+node /Users/boyaxie/.agents/skills/chatarchive-export/scripts/webpage-sample-check.mjs \
+  exports/bulk-YYYY-MM-DD \
+  --limit 1
+```
 
- - `platforms/*.json`：可执行 metadata，包括平台 ID、默认启用状态、作者别名、URL pattern、起始页面、QA notes。
- - `references/platforms/*.md`：面向操作者的平台说明，包括 URL、枚举入口、DOM 注意事项与平台特定排障。
+The helper opens exported conversation webpages through Kimi WebBridge and checks whether the first and last message snippets can be found in the page body. It closes the WebBridge sessions it creates.
 
- 新增平台时，应先添加 `platforms/<platform-id>.json` 和 `references/platforms/<platform-id>.md`，再确认外部 ChatArchive 导出器支持相同的 `--platform` ID。
+To preview the sampling plan without opening webpages:
 
- ## 元数据策略
+```bash
+node /Users/boyaxie/.agents/skills/chatarchive-export/scripts/webpage-sample-check.mjs \
+  exports/bulk-YYYY-MM-DD \
+  --limit 1 \
+  --dry-run-plan
+```
 
- 不要把弱页面证据当作已确认的模型使用记录。模型选择器、功能开关、状态 payload 或 UI 标签中出现的模型名，可能只是候选模型或默认值，并不一定对应具体会话轮次。
+## Platform plugins and notes
 
- - 未确认模型信息应保存为 `model_candidates`、`modelCandidates` 或 `modelHints`。
- - 只有当页面明确把某个模型归因到具体会话或消息时，才可写入确定性的 `model` / `models` 字段。
+Platform knowledge is split into two layers:
 
- ## 零消息候选
+- `platforms/*.json`: executable metadata, including platform ID, default enablement, author aliases, URL patterns, start pages, and QA notes.
+- `references/platforms/*.md`: operator-facing platform notes, including URLs, enumeration entrypoints, DOM details, and platform-specific troubleshooting.
 
- 零消息候选是平台 UI 或网络数据暴露出的 URL，但导出时未抽取到消息内容。它们应被保留以便追踪覆盖范围，但不要计入有内容的对话数量。判断 message-bearing 会话时，以 `summary.summary.messageCount > 0` 为准。
+When adding a new platform, first add `platforms/<platform-id>.json` and `references/platforms/<platform-id>.md`, then confirm the external ChatArchive exporter supports the same `--platform` ID.
 
- ## 排障提示
+## Metadata policy
 
- - WebBridge 命令超时时，可以增加超时时间，例如 `--command-timeout-ms 120000`，并使用同一输出目录恢复。
- - 平台特定的枚举或 DOM 问题，应先查看 `references/platforms/<platform-id>.md` 和 `platforms/<platform-id>.json`。
- - `results.jsonl` 中存在失败行但所有 `summary.json` 都是 `exported` 时，通常可将失败行视为历史尝试记录。
- - 平台未登录时应标记为需要认证并跳过；除非用户主动接管登录，否则不要自动输入凭据。
+Do not treat weak page evidence as confirmed model usage. Model names exposed in selectors, settings, feature flags, state payloads, or UI labels can be candidates or defaults rather than the model used for a specific conversation turn.
 
- ## 相关文档
+- Store unconfirmed model information as `model_candidates`, `modelCandidates`, or `modelHints`.
+- Write deterministic `model` or `models` fields only when the page clearly attributes a model to a specific conversation or message.
 
- - [Skill 入口说明](SKILL.md)
- - [完整工作流](references/workflow.md)
- - [平台插件索引](references/platforms/README.md)
+## Zero-message candidates
+
+Zero-message candidates are URLs exposed by platform UI or network data where no message content was extracted. Preserve them for coverage tracking, but do not count them as message-bearing conversations. Use `summary.summary.messageCount > 0` to identify message-bearing conversations.
+
+## Troubleshooting
+
+- If WebBridge commands time out, increase the timeout, for example `--command-timeout-ms 120000`, and resume with the same output directory.
+- For platform-specific enumeration or DOM issues, read `references/platforms/<platform-id>.md` and `platforms/<platform-id>.json` first.
+- If `results.jsonl` contains failure rows but all `summary.json` files show `exported`, the failure rows are usually historical attempt records.
+- If a platform is not logged in, mark it as requiring authentication and skip it unless the user explicitly takes over login. Do not enter credentials automatically.
+
+## Related documentation
+
+- [Skill entrypoint](SKILL.md)
+- [Agent instructions](AGENTS.md)
+- [Full workflow](references/workflow.md)
+- [Platform plugin index](references/platforms/README.md)
+
+## License
+
+MIT. See [LICENSE](LICENSE).

@@ -1,9 +1,15 @@
 ---
 name: chatarchive-export
-description: Bulk export and QA AI chatbot conversation archives from the ChatArchive project using Kimi WebBridge, the user's already-logged-in browser sessions, and registered platform plugins. Use when Codex needs to export, resume, audit, or compare chatbot histories with ChatArchive's bulk WebBridge CLI.
+description: Export, resume, audit, and QA ChatArchive histories with Kimi WebBridge, logged-in browser sessions, and platform plugins. For Codex, Claude Code, Cursor, and similar agents.
 ---
 
 # ChatArchive WebBridge Bulk Export
+
+## Compatibility
+
+This skill follows the Agent Skills pattern: a `chatarchive-export` directory with `SKILL.md` frontmatter (`name` and `description`) plus Markdown instructions. Use it with Codex, Claude Code, Cursor, and similar coding agents that can read `SKILL.md` and/or repository instructions such as `AGENTS.md`.
+
+Keep the skill focused on ChatArchive WebBridge export, resume, audit, comparison, and QA workflows. Load detailed procedure and platform notes from `references/` when needed.
 
 ## Workflow
 
