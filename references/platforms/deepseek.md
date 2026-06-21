@@ -16,4 +16,4 @@ Use the user's already logged-in browser session. Do not automate credential ent
 
 ## QA notes
 
-Markdown message headings produced for this platform should use the `DeepSeek` assistant label declared in the registry.
+Markdown transcript exports should use the common `Assistant` label. The registry's `DeepSeek` author alias remains for legacy QA compatibility.

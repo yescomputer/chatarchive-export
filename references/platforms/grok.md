@@ -16,7 +16,7 @@ Keep the tab active during DOM extraction. Grok page state can be sensitive to a
 
 ## QA notes
 
-Markdown message headings produced for this platform should use the `Grok` assistant label declared in the registry.
+Markdown transcript exports should use the common `Assistant` label. The registry's `Grok` author alias remains for legacy QA compatibility.
 
 ## Troubleshooting
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { getKnownAuthorLabels, getPlatformNotes, loadPlatformRegistry } from "./platform-registry.mjs";
 
 const PLATFORM_REGISTRY = loadPlatformRegistry();
@@ -102,8 +103,12 @@ function countMarkdownMessageHeadings(markdown) {
   return markdown
     .split(/\n/)
     .filter((line) => {
-      const match = line.match(/^###\s+(.+?)\s*$/);
-      return match && KNOWN_AUTHORS.has(match[1]);
+      const legacyHeading = line.match(/^###\s+(.+?)\s*$/);
+      if (legacyHeading && KNOWN_AUTHORS.has(legacyHeading[1])) {
+        return true;
+      }
+
+      return /^\*\*(User|Assistant)\*\*\s*$/.test(line);
     })
     .length;
 }
@@ -274,4 +279,11 @@ function main() {
   }
 }
 
-main();
+export {
+  auditExport,
+  countMarkdownMessageHeadings
+};
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}

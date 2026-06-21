@@ -18,7 +18,7 @@ Each platform config should include:
 - `id`: CLI platform id.
 - `displayName`: Human readable platform name.
 - `defaultEnabled`: Whether the platform belongs to the default export set.
-- `authorAliases`: Markdown message heading labels used by QA.
+- `authorAliases`: Legacy/platform author labels recognized by QA. New Markdown transcript exports use the common `User` and `Assistant` headings.
 - `canonicalUrlPatterns`: Expected conversation URL shapes.
 - `startUrls`: Recommended starting pages for enumeration.
 - `enumerationNotes`, `domNotes`, `troubleshooting`, `qaNotes`: Platform-specific guidance consumed by docs and QA reports.

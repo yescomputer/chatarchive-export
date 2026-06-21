@@ -17,4 +17,4 @@ Treat UI-exposed gem URLs as platform-specific conversation sources when the ext
 
 ## QA notes
 
-Markdown message headings produced for this platform should use the `Gemini` assistant label declared in the registry.
+Markdown transcript exports should use the common `Assistant` label. The registry's `Gemini` author alias remains for legacy QA compatibility.
